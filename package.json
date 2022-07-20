@@ -1,0 +1,29 @@
+{
+  "name": "vinny-and-frens",
+  "version": "1.0.0",
+  "description": "NFT",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinny-Frens/Vinny-and-Frens.git"
+  },
+  "keywords": [
+    "NFT",
+    "ERC721A"
+  ],
+  "author": "Jaz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vinny-Frens/Vinny-and-Frens/issues"
+  },
+  "homepage": "https://github.com/Vinny-Frens/Vinny-and-Frens#readme",
+  "devDependencies": {
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.0"
+  }
+}
