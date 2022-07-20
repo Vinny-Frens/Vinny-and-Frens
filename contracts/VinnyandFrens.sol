@@ -12,17 +12,22 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     uint256 public immutable maxSupply = 7799;
     /// @notice NFT Mint Price
     uint256 public mintPrice = .07799 ether;
+    // If you are on the list, you can mint early
+    mapping(address => bool) public whitelist;     
     /// @notice Artist Wallet
     address private artWallet;
     /// @notice Dev Wallet
     address private devWallet;
     /// @notice NFT's Base Token URI
-    string private baseTokenUri;  
+    string private baseTokenUri;
+    /// @notice Is Minting Whitelist or Main mint
+    bool public isWhitelist;
 
     error EmptyBalance();
     error IncorrectAmount();
     error InvalidQuantity();
     error MintedOut();
+    error NotWhitelisted();
 
     /// @notice Deploy ERC-721A contract and initialize some values
     /// @param _tokenURI The initial global TokenURI
@@ -34,9 +39,18 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         _mint(_msgSender(), 100);
         devWallet = _dev;
         artWallet = _art;
+        isWhitelist = true;
     }
 
     /// External
+
+    ///@notice Add an multiple addresses to the whitelist
+    ///@param _whitelist array of addresses
+    function addWhitelist(address[] memory _whitelist) external onlyOwner {
+        for (uint i = 0; i < _whitelist.length; i++) {
+            whitelist[_whitelist[i]] = true;
+          }
+    }
 
     /// @notice Main Mint function
     /// @param _quantity How many mints would you like?
@@ -44,6 +58,11 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         if(_quantity < 1) { revert InvalidQuantity(); }
         if(totalSupply() + _quantity >= maxSupply) { revert MintedOut(); }
         if(msg.value < mintPrice) { revert IncorrectAmount(); }
+        // If Phase is Whitelist, you must be on the list AND mint must be 2 or less
+        if(isWhitelist) {
+            if(_quantity > 2) { revert InvalidQuantity(); }
+            if(!whitelist[_msgSender()]) { revert NotWhitelisted(); }
+        }
         _mint(_msgSender(), _quantity);
     }
 
@@ -65,6 +84,11 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         mintPrice = _newPrice;
     }
  
+    /// @notice Turn ON/OFF the whitelist Phase
+    function updatePhase() external onlyOwner {
+        isWhitelist = !isWhitelist;
+    }
+
     /// @notice Withdraw funds payment split between Art and Devs
     function withdraw() external onlyOwner {
         if(address(this).balance <= 0) { revert EmptyBalance(); }
