@@ -12,7 +12,7 @@ contract TVAF is ERC721A, Ownable, Pausable {
     // @notice Counter for number of minted characters
     Counters.Counter public _tokenIds;    
     // Max Supply of DegenDwarfs
-    uint256 public immutable maxSupply = 100;
+    uint256 public immutable maxSupply = 7799;
     uint256 public mintPrice;
     address private artWallet;
     address private devWallet;
