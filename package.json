@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/Vinny-Frens/Vinny-and-Frens#readme",
   "devDependencies": {
-    "erc721a": "^4.2.0",
     "hardhat": "^2.10.1"
   },
   "dependencies": {
