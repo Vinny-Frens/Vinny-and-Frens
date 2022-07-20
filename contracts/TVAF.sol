@@ -6,15 +6,15 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./ERC721A/ERC721A.sol";
 
+/// Contract @title The Vinnie And Frens
 contract TVAF is ERC721A, Ownable, Pausable {
     using Counters for Counters.Counter;
-
-    /// @notice Counter for number of minted Frens
-    Counters.Counter public tokenIds;    
+    /// @notice Current Supply
+    uint256 public supply;
     /// @notice Max Supply of Frens (immutable)
     uint256 public immutable maxSupply = 7799;
     /// @notice NFT Mint Price
-    uint256 public mintPrice;
+    uint256 public mintPrice = .07799 ether;
     /// @notice Artist Wallet
     address private artWallet;
     /// @notice Dev Wallet
@@ -35,20 +35,40 @@ contract TVAF is ERC721A, Ownable, Pausable {
         baseTokenUri = _tokenURI;
         //Mint 100 at deployment? to Deployer wallet?
         _mint(_msgSender(), 100);
-        mintPrice = 0.01 ether;
         devWallet = _dev;
         artWallet = _art;
     }
 
+    /// External
+
     /// @notice Main Mint function
     /// @param _quantity How many mints would you like?
     function mint(uint256 _quantity) external payable whenNotPaused {
-        if(_quantity <= 0) { revert InvalidQuantity(); }
-        if(tokenIds.current() + _quantity >= maxSupply) { revert MintedOut(); }
+        if(_quantity < 1) { revert InvalidQuantity(); }
+        if(supply + _quantity >= maxSupply) { revert MintedOut(); }
         if(msg.value < mintPrice) { revert IncorrectAmount(); }
         _mint(_msgSender(), _quantity);
+        supply += _quantity;
     }
 
+    /// @notice Update the base URI
+    /// @param _baseURI The new base URI
+    function setBaseURI(string memory _baseURI) external onlyOwner {
+        baseTokenUri = _baseURI;
+    }  
+   
+    /// @notice Returns the URI link for the metadata
+    /// @param _tokenId Token ID
+    function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(_baseURI(), toString(_tokenId), ".json"));
+    }
+
+    /// @notice Update the Mint price
+    /// @param _newPrice The new mint price
+    function updatePrice(uint256 _newPrice) external onlyOwner {
+        mintPrice = _newPrice;
+    }
+ 
     /// @notice Withdraw funds payment split between Art and Devs
     function withdraw() external onlyOwner {
         if(address(this).balance <= 0) { revert EmptyBalance(); }
@@ -59,21 +79,7 @@ contract TVAF is ERC721A, Ownable, Pausable {
         payable(devWallet).transfer(devPay);
     }
 
-    /// @notice Update the Mint price
-    /// @param _newPrice The new mint price
-    function updatePrice(uint256 _newPrice) external onlyOwner {
-        mintPrice = _newPrice;
-    }
- 
-    /// @notice Update the base URI
-    /// @param _baseURI The new base URI
-    function setBaseURI(string memory _baseURI) external onlyOwner {
-        baseTokenUri = _baseURI;
-    }  
-   
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_baseURI(), toString(tokenId), ".json"));
-    }
+    /// Internal
 
     function toString(uint256 value) internal pure returns (string memory) {
     // Inspired by OraclizeAPI's implementation - MIT license
