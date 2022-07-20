@@ -1,5 +1,4 @@
-# <img src="https://github.com/Vinny-Frens/Vinny-and-Frens-Contract/blob/dev/images/8.png" wdith="500">
-
+<img src="https://github.com/Vinny-Frens/Vinny-and-Frens-Contract/blob/dev/images/8.png" width="750">
 
 ## Development
 ### Setup/Install
