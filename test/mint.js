@@ -12,7 +12,7 @@ describe("TVAF Contract", function () {
   beforeEach(async function () {
     provider = waffle.provider;
 
-    TVAF = await ethers.getContractFactory("TVAF");
+    TVAF = await ethers.getContractFactory("VinnyandFrens");
 
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 

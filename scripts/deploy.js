@@ -17,12 +17,12 @@ async function main() {
     );
 
     console.log("Account balance:", (await deployer.getBalance()).toString());
-    TVAF = await ethers.getContractFactory("TVAF");
+    TVAF = await ethers.getContractFactory("VinnyandFrens");
 
     //Deploy TVAF.sol
     TVAF = await TVAF.deploy("", deployer.getAddress(), deployer.getAddress());
     await TVAF.deployed();
-    console.log("TVAF contract Deployed");    
+    console.log("VinnyandFrens contract Deployed");    
 
     saveFrontendFiles();
 }
@@ -37,13 +37,13 @@ function saveFrontendFiles() {
   
     fs.writeFileSync(
       contractsDir + "/abi/contract-addresses.json",
-      JSON.stringify({ TVAF: TVAF.address}, undefined, 2)
+      JSON.stringify({ VinnyandFrens: TVAF.address}, undefined, 2)
     );
   
-    TVAFArtifact = artifacts.readArtifactSync("TVAF");
+    TVAFArtifact = artifacts.readArtifactSync("VinnyandFrens");
   
     fs.writeFileSync(
-      contractsDir + "/abi/TVAF.json",
+      contractsDir + "/abi/VinnyandFrens.json",
       JSON.stringify(TVAFArtifact, null, 2)
     );
   

@@ -36,6 +36,14 @@ module.exports = {
     //   accounts: [`${PRIVATE_KEY}`]
     // }
   },
+  gasReporter: {
+    currency: 'USD',
+    token: 'ETH',
+    gasPrice: 100,    
+    showTimeSpent: true,
+    // excludeContracts: [''],
+    coinmarketcap: 'APY_KEY'
+  },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
