@@ -8,9 +8,6 @@ import "./ERC721A/ERC721A.sol";
 
 /// Contract @title The Vinnie And Frens
 contract TVAF is ERC721A, Ownable, Pausable {
-    using Counters for Counters.Counter;
-    /// @notice Current Supply
-    uint256 public supply;
     /// @notice Max Supply of Frens (immutable)
     uint256 public immutable maxSupply = 7799;
     /// @notice NFT Mint Price
@@ -45,10 +42,9 @@ contract TVAF is ERC721A, Ownable, Pausable {
     /// @param _quantity How many mints would you like?
     function mint(uint256 _quantity) external payable whenNotPaused {
         if(_quantity < 1) { revert InvalidQuantity(); }
-        if(supply + _quantity >= maxSupply) { revert MintedOut(); }
+        if(totalSupply() + _quantity >= maxSupply) { revert MintedOut(); }
         if(msg.value < mintPrice) { revert IncorrectAmount(); }
         _mint(_msgSender(), _quantity);
-        supply += _quantity;
     }
 
     /// @notice Update the base URI

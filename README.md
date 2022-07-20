@@ -1,13 +1,20 @@
-# Sample Hardhat Project
+<img src="https://github.com/Vinny-Frens/Vinny-and-Frens-Contract/blob/dev/images/8.png" width="750">
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
+## Development
+### Setup & Install
 ```shell
-npx hardhat help
+git clone https://github.com/Vinny-Frens/Vinny-and-Frens-Contract.git
+cd Vinny-and-Frens-Contract
+npm install
+cp sample.hardhat.config.js hardhat.config.js
+```
+
+### Test
+```shell
 npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+```
+
+### Deploy
+```sh
+npx hardhat run scripts/deploy.js --network <network>
 ```
