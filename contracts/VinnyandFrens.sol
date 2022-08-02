@@ -14,10 +14,8 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     uint256 public mintPrice = .07799 ether;
     // If you are on the list, you can mint early
     mapping(address => bool) public whitelist;     
-    /// @notice Artist Wallet
-    address private artWallet;
     /// @notice Dev Wallet
-    address private devWallet;
+    address private beneficiary;
     /// @notice NFT's Base Token URI
     string private baseTokenUri;
     /// @notice Is Minting Whitelist or Main mint
@@ -31,14 +29,12 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
 
     /// @notice Deploy ERC-721A contract and initialize some values
     /// @param _tokenURI The initial global TokenURI
-    /// @param _dev The developer address
-    /// @param _art The artist address
-    constructor(string memory _tokenURI, address _dev, address _art) ERC721A("The Vinnie And Frens", "TVAF") {
+    /// @param _benef The beneficiary address
+    constructor(string memory _tokenURI, address _benef) ERC721A("The Vinnie And Frens", "TVAF") {
         baseTokenUri = _tokenURI;
         //Mint 100 at deployment? to Deployer wallet?
         _mint(_msgSender(), 100);
-        devWallet = _dev;
-        artWallet = _art;
+        beneficiary = _benef;
         isWhitelist = true;
     }
 
@@ -62,6 +58,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         if(isWhitelist) {
             if(_quantity > 2) { revert InvalidQuantity(); }
             if(!whitelist[_msgSender()]) { revert NotWhitelisted(); }
+            whitelist[_msgSender()] = false;
         }
         _mint(_msgSender(), _quantity);
     }
@@ -92,11 +89,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     /// @notice Withdraw funds payment split between Art and Devs
     function withdraw() external onlyOwner {
         if(address(this).balance <= 0) { revert EmptyBalance(); }
-        uint256 artPay = (address(this).balance * (1e18 - 0.6 ether)) / 1e18;
-        uint256 devPay = (address(this).balance * (1e18 - 0.4 ether)) / 1e18;
-        //Add logic
-        payable(artWallet).transfer(artPay);
-        payable(devWallet).transfer(devPay);
+        payable(beneficiary).transfer(artPay);
     }
 
     /// Internal
