@@ -12,12 +12,16 @@ describe("TVAF Contract", function () {
   beforeEach(async function () {
     provider = waffle.provider;
 
+    PayMe = await ethers.getContractFactory("PaymentSplitter");  
     TVAF = await ethers.getContractFactory("VinnyandFrens");
 
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
-    //Deploy Loans.sol
-    TVAF = await TVAF.deploy("", owner.address, addr1.address);
+    //Deploy
+    PayMe = await PayMe.deploy([owner.address, addr1.address], ["60", "40"]);
+    await PayMe.deployed();
+
+    TVAF = await TVAF.deploy("", PayMe.address);
     await TVAF.deployed();
 
   });
@@ -62,13 +66,17 @@ describe("TVAF Contract", function () {
 
         expect(await TVAF.totalSupply()).to.equal(113);  
         contractBalance = await provider.getBalance(TVAF.address);
-        expect(contractBalance).to.equal(ethers.utils.parseEther("1.01387"));  
-        expect(await provider.getBalance(owner.address)).to.equal(ethers.utils.parseEther("9999.980245145563270718"));  
-        expect(await provider.getBalance(addr1.address)).to.equal(ethers.utils.parseEther("9999.84387917338537984"));  
+        expect(contractBalance).to.equal(ethers.utils.parseEther("1.01387"));
+        expect(await provider.getBalance(owner.address)).to.equal(ethers.utils.parseEther("9999.972554605175161615"));  
+        expect(await provider.getBalance(addr1.address)).to.equal(ethers.utils.parseEther("9999.843890622817050496"));  
         // Should do a 60/40 split
         await TVAF.withdraw();
         contractBalance = await provider.getBalance(TVAF.address);        
         expect(contractBalance).to.equal(ethers.utils.parseEther("0"));  
+
+        expect(await provider.getBalance(PayMe.address)).to.equal(ethers.utils.parseEther("1.01387"));
+        await PayMe.release(owner.address);
+
         // RECEIVED 0.60826544098 ETH
         expect(await provider.getBalance(owner.address)).to.equal(ethers.utils.parseEther("10000.588510586545201703"));  
         // RECEIVED 0.40554799999 ETH
