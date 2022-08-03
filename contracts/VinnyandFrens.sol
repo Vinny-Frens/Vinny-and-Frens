@@ -1,12 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+ /*  _     _      _     _      _     _      _     _      _     _     &     _     _      _     _      _     _      _     _      _     _   
+  (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)         (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)  
+   / ._. \      / ._. \      / ._. \      / ._. \      / ._. \           / ._. \      / ._. \      / ._. \      / ._. \      / ._. \   
+ __\( Y )/__  __\( Y )/__  __\( Y )/__  __\( Y )/__  __\( Y )/__       __\( Y )/__  __\( Y )/__  __\( Y )/__  __\( Y )/__  __\( Y )/__ 
+(_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)     (_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)(_.-/'-'\-._)
+   || V ||      || I ||      || N ||      || N ||      || Y ||           || F ||      || R ||      || E ||      || N ||      || S ||   
+ _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._       _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._ 
+(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)     (.-./`-'\.-.)(.-./`-`\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-`\.-.)
+ `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'       `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' 
+*/
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./ERC721A/ERC721A.sol";
 
-/// Contract @title The Vinnie And Frens
+/// Contract @title Vinny and Frens
 contract VinnyandFrens is ERC721A, Ownable, Pausable {
     /// @notice Max Supply of Frens (immutable)
     uint256 public immutable maxSupply = 7799;
@@ -30,7 +41,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     /// @notice Deploy ERC-721A contract and initialize some values
     /// @param _tokenURI The initial global TokenURI
     /// @param benef The developer address
-    constructor(string memory _tokenURI, address benef) ERC721A("The Vinnie And Frens", "TVAF") {
+    constructor(string memory _tokenURI, address benef) ERC721A("Vinny and Frens", "VAF") {
         baseTokenUri = _tokenURI;
         //Mint 100 at deployment? to Deployer wallet?
         _mint(_msgSender(), 100);
@@ -85,12 +96,12 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         isWhitelist = !isWhitelist;
     }
 
-    /// @notice Withdraw funds payment split between Art and Devs
+   /* /// @notice Withdraw funds payment split between Art and Devs
     function withdraw() external onlyOwner {
         if(address(this).balance <= 0) { revert EmptyBalance(); }
         payable(beneficiary).transfer(address(this).balance);
     }
-
+*/
     /// Internal
 
     function toString(uint256 value) internal pure returns (string memory) {
