@@ -54,33 +54,4 @@ describe("TVAF Contract", function () {
         expect(await TVAF.totalSupply()).to.equal(169);  
     });
   });
-
-  describe("Verify Payment Splitter", function () {
-    it("Payment Splitter", async function () {
-        await TVAF.updatePhase();
-        let contractBalance = await provider.getBalance(TVAF.address);
-        expect(contractBalance).to.equal(ethers.utils.parseEther("0"));          
-        //Mint Test Tokens
-        let overrides = {value: ethers.utils.parseEther("1.01387")};        
-        await TVAF.connect(addr2).mint(13, overrides);
-
-        expect(await TVAF.totalSupply()).to.equal(113);  
-        contractBalance = await provider.getBalance(TVAF.address);
-        expect(contractBalance).to.equal(ethers.utils.parseEther("1.01387"));
-        expect(await provider.getBalance(owner.address)).to.equal(ethers.utils.parseEther("9999.972554605175161615"));  
-        expect(await provider.getBalance(addr1.address)).to.equal(ethers.utils.parseEther("9999.843890622817050496"));  
-        // Should do a 60/40 split
-        await TVAF.withdraw();
-        contractBalance = await provider.getBalance(TVAF.address);        
-        expect(contractBalance).to.equal(ethers.utils.parseEther("0"));  
-
-        expect(await provider.getBalance(PayMe.address)).to.equal(ethers.utils.parseEther("1.01387"));
-        await PayMe.release(owner.address);
-
-        // RECEIVED 0.60826544098 ETH
-        expect(await provider.getBalance(owner.address)).to.equal(ethers.utils.parseEther("10000.588510586545201703"));  
-        // RECEIVED 0.40554799999 ETH
-        expect(await provider.getBalance(addr1.address)).to.equal(ethers.utils.parseEther("10000.24942717338537984"));  
-    });
-  });
 });
