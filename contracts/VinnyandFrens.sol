@@ -55,7 +55,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     ///@param _whitelist array of addresses
     function addWhitelist(address[] memory _whitelist) external onlyOwner {
         for (uint i = 0; i < _whitelist.length; i++) {
-            whitelist[_whitelist[i]] = 5;
+            whitelist[_whitelist[i]] = 10;
           }
     }
 
@@ -67,7 +67,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         if(msg.value < mintPrice) { revert IncorrectAmount(); }
         // If Phase is Whitelist, you must be on the list AND mint must be 2 or less
         if(isWhitelist) {
-            if(_quantity > 5) { revert InvalidQuantity(); }
+            if(_quantity > 10) { revert InvalidQuantity(); }
             if(!whitelist[_msgSender()]) { revert NotWhitelisted(); }
             whitelist[_msgSender()] -= _quantity;
         }
