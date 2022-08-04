@@ -68,7 +68,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         // If Phase is Whitelist, you must be on the list AND mint must be 2 or less
         if(isWhitelist) {
             if(_quantity > 10) { revert InvalidQuantity(); }
-            if(!whitelist[_msgSender()]) { revert NotWhitelisted(); }
+            if(whitelist[_msgSender()] = 0) { revert NotWhitelisted(); }
             whitelist[_msgSender()] -= _quantity;
         }
         _mint(_msgSender(), _quantity);
