@@ -83,7 +83,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     /// @notice Returns the URI link for the metadata
     /// @param _tokenId Token ID
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(_baseURI(), toString(_tokenId), ".json"));
+        return string(abi.encodePacked(baseTokenUri, toString(_tokenId), ".json"));
     }
 
     /// @notice Update the Mint price
