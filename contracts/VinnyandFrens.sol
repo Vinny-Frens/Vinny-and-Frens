@@ -24,7 +24,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     /// @notice NFT Mint Price
     uint256 public mintPrice = .07799 ether;
     // If you are on the list, you can mint early
-    mapping(address => bool) public whitelist;     
+    mapping(address => uint256) public whitelist;     
     /// @notice Dev Wallet
     address private beneficiary;
     /// @notice NFT's Base Token URI
@@ -55,7 +55,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
     ///@param _whitelist array of addresses
     function addWhitelist(address[] memory _whitelist) external onlyOwner {
         for (uint i = 0; i < _whitelist.length; i++) {
-            whitelist[_whitelist[i]] = true;
+            whitelist[_whitelist[i]] = 5;
           }
     }
 
@@ -67,8 +67,9 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         if(msg.value < mintPrice) { revert IncorrectAmount(); }
         // If Phase is Whitelist, you must be on the list AND mint must be 2 or less
         if(isWhitelist) {
-            if(_quantity > 2) { revert InvalidQuantity(); }
+            if(_quantity > 5) { revert InvalidQuantity(); }
             if(!whitelist[_msgSender()]) { revert NotWhitelisted(); }
+            whitelist[_msgSender()] -= _quantity;
         }
         _mint(_msgSender(), _quantity);
     }
@@ -96,12 +97,12 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         isWhitelist = !isWhitelist;
     }
 
-   /* /// @notice Withdraw funds payment split between Art and Devs
-    function withdraw() external onlyOwner {
-        if(address(this).balance <= 0) { revert EmptyBalance(); }
-        payable(beneficiary).transfer(address(this).balance);
-    }
-*/
+    /// @notice Withdraw funds payment split between Art and Devs
+     function withdraw() external onlyOwner {
+         if(address(this).balance <= 0) { revert EmptyBalance(); }
+         payable(beneficiary).transfer(address(this).balance);
+     }
+
     /// Internal
 
     function toString(uint256 value) internal pure returns (string memory) {
