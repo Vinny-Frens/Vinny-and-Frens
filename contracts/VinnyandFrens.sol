@@ -10,7 +10,7 @@ pragma solidity ^0.8.13;
  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._       _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._ 
 (.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)     (.-./`-'\.-.)(.-./`-`\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-`\.-.)
  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'       `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' 
-*/
+Lead Dev Jaz with help from masterminds Doyler & Stinky*/
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -97,7 +97,7 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         isWhitelist = !isWhitelist;
     }
 
-    /// @notice Withdraw funds payment split between Art and Devs
+    /// @notice Withdraw funds to payment splittter for Devs and Artist
      function withdraw() external onlyOwner {
          if(address(this).balance <= 0) { revert EmptyBalance(); }
          payable(beneficiary).transfer(address(this).balance);
