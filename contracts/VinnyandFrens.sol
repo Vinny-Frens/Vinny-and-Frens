@@ -10,7 +10,7 @@ pragma solidity ^0.8.13;
  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._       _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._ 
 (.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)     (.-./`-'\.-.)(.-./`-`\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-`\.-.)
  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'       `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' 
-Lead Dev Jaz with help from masterminds Doyler & Stinky*/
+Lead Dev Jaz with help from masterminds Doyler, Stinky & 0xZoom*/
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -49,6 +49,10 @@ contract VinnyandFrens is ERC721A, Ownable, Pausable {
         isWhitelist = true;
     }
 
+function _startTokenId() internal view virtual override returns (uint256) {
+    return 1;
+  }
+  
     /// External
 
     ///@notice Add an multiple addresses to the whitelist
