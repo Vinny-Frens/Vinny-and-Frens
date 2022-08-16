@@ -90,7 +90,7 @@ contract VinnyProposed is ERC721AQueryable, Ownable, ReentrancyGuard {
   }
 
   //return URI for a token based on whether collection is revealed or not
-  function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
+  function tokenURI(uint256 _tokenId) public view virtual override(ERC721A) returns (string memory) {
     require(_exists(_tokenId), 'ERC721Metadata: URI query for nonexistent token');
 
     if (revealed == false) {
