@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+
+pragma solidity >=0.8.9 <0.9.0;
 
  /*  _     _      _     _      _     _      _     _      _     _     &     _     _      _     _      _     _      _     _      _     _   
   (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)         (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)    (c).-.(c)  
@@ -10,128 +11,187 @@ pragma solidity ^0.8.13;
  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._       _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._  _.' `-' '._ 
 (.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-'\.-.)     (.-./`-'\.-.)(.-./`-`\.-.)(.-./`-'\.-.)(.-./`-'\.-.)(.-./`-`\.-.)
  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'       `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-'  `-'     `-' 
-Lead Dev Jaz with help from masterminds Doyler, Stinky & 0xZoom*/
+Lead Dev Jaz with help from devs 0xZoom, Doyler and Stinky */
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "./ERC721A/ERC721A.sol";
+import 'erc721a/contracts/extensions/ERC721AQueryable.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import '@openzeppelin/contracts/utils/Strings.sol';
 
-/// Contract @title Vinny and Frens
-contract VinnyandFrens is ERC721A, Ownable, Pausable {
-    /// @notice Max Supply of Frens (immutable)
-    uint256 public immutable maxSupply = 7799;
-    /// @notice NFT Mint Price
-    uint256 public mintPrice = .07799 ether;
-    // If you are on the list, you can mint early
-    mapping(address => uint256) public whitelist;     
-    /// @notice Dev Wallet
-    address private beneficiary;
-    /// @notice NFT's Base Token URI
-    string private baseTokenUri;
-    /// @notice Is Minting Whitelist or Main mint
-    bool public isWhitelist;
 
-    error EmptyBalance();
-    error IncorrectAmount();
-    error InvalidQuantity();
-    error MintedOut();
-    error NotWhitelisted();
+contract VinnyProposed is ERC721AQueryable, Ownable, ReentrancyGuard {
 
-    /// @notice Deploy ERC-721A contract and initialize some values
-    /// @param _tokenURI The initial global TokenURI
-    /// @param benef The developer address
-    constructor(string memory _tokenURI, address benef) ERC721A("Vinny and Frens", "VAF") {
-        baseTokenUri = _tokenURI;
-        //Mint 100 at deployment? to Deployer wallet?
-        _mint(_msgSender(), 100);
-        beneficiary = benef;
-        isWhitelist = true;
-    }
+  using Strings for uint256;
 
-function _startTokenId() internal view virtual override returns (uint256) {
-    return 1;
+  bytes32 public merkleRoot;
+  mapping(address => bool) public whitelistClaimed;
+
+  string public uriPrefix = '';
+  string public uriSuffix = '.json';
+  string public hiddenMetadataUri = '';
+  
+  uint256 public cost = 0.07799 ether;
+  uint256 public maxSupply = 7799;
+  uint256 public maxMintAmountPerTx = 42;
+  uint256 public maxWalletSize = 70;
+
+  bool public paused = true;
+  bool public whitelistMintEnabled = false;
+  bool public revealed = false;
+
+  constructor(
+    string memory _tokenName,
+    string memory _tokenSymbol,
+    uint256 _cost,
+    uint256 _maxSupply,
+    uint256 _maxMintAmountPerTx,
+    uint256 _maxWalletSize,
+    string memory _hiddenMetadataUri
+  ) ERC721A(_tokenName, _tokenSymbol) {
+    setCost(_cost);
+    maxSupply = _maxSupply;
+    setMaxMintAmountPerTx(_maxMintAmountPerTx);
+    setMaxWalletSize(_maxWalletSize);
+    setHiddenMetadataUri(_hiddenMetadataUri);
+    //to mint at contract deployment. Enter address and qty to mint (replace 1)
+    _mint(address (0x4D6227fCba4c25FEac2B6EA347Ebd7851B781EDf), 42);
+        _mint(address (0xBc580550DbeCA7EEd8477c7dEeA356dF5EadF3cF), 3);
+   
+  }
+
+  //Checks for correct mint data being passed through
+  modifier mintCheck(uint256 _mintAmount) {
+    require(_mintAmount > 0 && _mintAmount <= maxMintAmountPerTx, 'Invalid mint amount!');
+    require(totalSupply() + _mintAmount <= maxSupply, 'Max supply exceeded!');
+    require(balanceOf(msg.sender) + _mintAmount <= maxWalletSize, 'Too many NFTs in this wallet!');
+    _;
+  }
+  //Checks for correct mint pricing data being passed through
+  modifier mintPriceCheck(uint256 _mintAmount) {
+    require(msg.value >= cost * _mintAmount, 'Insufficient funds!');
+    _;
+  }
+  //Whitelist minting
+  function whitelistMint(uint256 _mintAmount, bytes32[] calldata _merkleProof) public payable mintCheck(_mintAmount) mintPriceCheck(_mintAmount) {
+    // Checks whether the mint is open, whether an address has already claimed, and that they are on the WL
+    require(whitelistMintEnabled, 'The whitelist sale is not enabled!');
+    require(!whitelistClaimed[_msgSender()], 'Address already claimed!');
+    bytes32 leaf = keccak256(abi.encodePacked(_msgSender()));
+    require(MerkleProof.verify(_merkleProof, merkleRoot, leaf), 'Invalid proof!');
+
+    whitelistClaimed[_msgSender()] = true;
+    _mint(_msgSender(), _mintAmount);
   }
   
-    /// External
+  //Public minting
+  function mint(uint256 _mintAmount) public payable mintCheck(_mintAmount) mintPriceCheck(_mintAmount) {
+    require(!paused, 'The contract is paused!');
 
-    ///@notice Add an multiple addresses to the whitelist
-    ///@param _whitelist array of addresses
-    function addWhitelist(address[] memory _whitelist) external onlyOwner {
-        for (uint i = 0; i < _whitelist.length; i++) {
-            whitelist[_whitelist[i]] = 10;
-          }
+    _mint(_msgSender(), _mintAmount);
+  }
+  
+  //Airdrop function - sends enetered number of NFTs to an address for free. Can only be called by Owner
+  function airdrop(uint256 _mintAmount, address _receiver) public mintCheck(_mintAmount) onlyOwner {
+    _mint(_receiver, _mintAmount);
+  }
+
+  //Starts token numbers from 1 rather than 0
+  function _startTokenId() internal view virtual override returns (uint256) {
+    return 1;
+  }
+
+  //return URI for a token based on whether collection is revealed or not
+  function tokenURI(uint256 _tokenId) public view virtual override(ERC721A) returns (string memory) {
+    require(_exists(_tokenId), 'ERC721Metadata: URI query for nonexistent token');
+
+    if (revealed == false) {
+      return hiddenMetadataUri;
     }
 
-    /// @notice Main Mint function
-    /// @param _quantity How many mints would you like?
-    function mint(uint256 _quantity) external payable whenNotPaused {
-        if(_quantity < 1) { revert InvalidQuantity(); }
-        if(totalSupply() + _quantity >= maxSupply) { revert MintedOut(); }
-        if(msg.value < mintPrice) { revert IncorrectAmount(); }
-        // If Phase is Whitelist, you must be on the list AND mint must be 2 or less
-        if(isWhitelist) {
-            if(_quantity > 10) { revert InvalidQuantity(); }
-            if(whitelist[_msgSender()] == 0) { revert NotWhitelisted(); }
-            whitelist[_msgSender()] -= _quantity;
-        }
-        _mint(_msgSender(), _quantity);
-    }
+    string memory currentBaseURI = _baseURI();
+    return bytes(currentBaseURI).length > 0
+        ? string(abi.encodePacked(currentBaseURI, _tokenId.toString(), uriSuffix))
+        : '';
+  }
 
-    /// @notice Update the base URI
-    /// @param _baseURI The new base URI
-    function setBaseURI(string memory _baseURI) external onlyOwner {
-        baseTokenUri = _baseURI;
-    }  
-   
-    /// @notice Returns the URI link for the metadata
-    /// @param _tokenId Token ID
-    function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(baseTokenUri, toString(_tokenId), ".json"));
-    }
+  //Reveal Collection  -true or false
+  function setRevealed(bool _state) public onlyOwner {
+    revealed = _state;
+  }
 
-    /// @notice Update the Mint price
-    /// @param _newPrice The new mint price
-    function updatePrice(uint256 _newPrice) external onlyOwner {
-        mintPrice = _newPrice;
-    }
- 
-    /// @notice Turn ON/OFF the whitelist Phase
-    function updatePhase() external onlyOwner {
-        isWhitelist = !isWhitelist;
-    }
+  //Change token cost
+  function setCost(uint256 _cost) public onlyOwner {
+    cost = _cost;
+  }
 
-    /// @notice Withdraw funds to payment splittter for Devs and Artist
-     function withdraw() external onlyOwner {
-         if(address(this).balance <= 0) { revert EmptyBalance(); }
-         payable(beneficiary).transfer(address(this).balance);
-     }
+  //Change max amount of tokens por txn
+  function setMaxMintAmountPerTx(uint256 _maxMintAmountPerTx) public onlyOwner {
+    maxMintAmountPerTx = _maxMintAmountPerTx;
+  }
 
-    /// Internal
+  //Change max amount of tokens per wallet
+  function setMaxWalletSize(uint256 _maxWalletSize) public onlyOwner {
+    maxWalletSize = _maxWalletSize;
+  }
 
-    function toString(uint256 value) internal pure returns (string memory) {
-    // Inspired by OraclizeAPI's implementation - MIT license
-    // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-        if (value == 0) {
-            return "0";
-        }
+  //set hidden metadata URI
+  function setHiddenMetadataUri(string memory _hiddenMetadataUri) public onlyOwner {
+    hiddenMetadataUri = _hiddenMetadataUri;
+  }
 
-        uint256 temp = value;
-        uint256 digits;
+  //set revealed URI prefix eg. ipfs://QmYW4a3Y--Yrs1JvhKzWzpTG2oF/
+  function setUriPrefix(string memory _uriPrefix) public onlyOwner {
+    uriPrefix = _uriPrefix;
+  }
 
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
+  //set revealed URI suffix eg. .json
+  function setUriSuffix(string memory _uriSuffix) public onlyOwner {
+    uriSuffix = _uriSuffix;
+  }
 
-        bytes memory buffer = new bytes(digits);
+  //function to pause the contract
+  function setPaused(bool _state) public onlyOwner {
+    paused = _state;
+  }
 
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
+  //function to set the merkle root
+  function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
+    merkleRoot = _merkleRoot;
+  }
 
-        return string(buffer);
-    }
+  //function to enable the white list mint
+  function setWhitelistMintEnabled(bool _state) public onlyOwner {
+    whitelistMintEnabled = _state;
+  }
+  
+ function withdraw() public onlyOwner nonReentrant {
+
+    (bool hs, ) = payable(0x4D6227fCba4c25FEac2B6EA347Ebd7851B781EDf).call{value: address(this).balance * 60/ 100}('');
+    require(hs);
+
+    (bool os, ) = payable(0xBc580550DbeCA7EEd8477c7dEeA356dF5EadF3cF).call{value: address(this).balance}('');
+    require(os);
+  }
+
+  //for emergency withdrawl if there is a problem with the payment splitter. You can remove this.
+  function justInCase() public onlyOwner nonReentrant {
+    
+    (bool os, ) = payable(owner()).call{value: address(this).balance}('');
+    require(os);
+    
+  }
+
+  //update maxsupply to decrease colecton size if needed
+  function updateMaxSupply(uint256 _newSupply) external onlyOwner {
+        require(_newSupply < maxSupply, "You tried to increase the suppply. Decrease only.");
+        maxSupply = _newSupply;
+  }
+
+
+  function _baseURI() internal view virtual override returns (string memory) {
+    return uriPrefix;
+  }
+
+  
 }
