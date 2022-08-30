@@ -20,7 +20,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 
 
-contract VinnyProposed is ERC721AQueryable, Ownable, ReentrancyGuard {
+contract VinnyFinal is ERC721AQueryable, Ownable, ReentrancyGuard {
 
   using Strings for uint256;
 
