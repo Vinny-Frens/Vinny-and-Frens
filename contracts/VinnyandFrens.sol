@@ -55,8 +55,8 @@ contract VinnyProposed is ERC721AQueryable, Ownable, ReentrancyGuard {
     setMaxWalletSize(_maxWalletSize);
     setHiddenMetadataUri(_hiddenMetadataUri);
     //to mint at contract deployment. Enter address and qty to mint (replace 1)
-    _mint(address (0x4D6227fCba4c25FEac2B6EA347Ebd7851B781EDf), 42);
-        _mint(address (0xBc580550DbeCA7EEd8477c7dEeA356dF5EadF3cF), 3);
+    _mint(address (0xd40ebdb64C6A4445ab6a3361cbeF77Eb9d32b78c), 100);
+        
    
   }
 
@@ -167,10 +167,10 @@ contract VinnyProposed is ERC721AQueryable, Ownable, ReentrancyGuard {
   
  function withdraw() public onlyOwner nonReentrant {
 
-    (bool hs, ) = payable(0x4D6227fCba4c25FEac2B6EA347Ebd7851B781EDf).call{value: address(this).balance * 60/ 100}('');
+    (bool hs, ) = payable(0xd40ebdb64C6A4445ab6a3361cbeF77Eb9d32b78c).call{value: address(this).balance * 60/ 100}('');
     require(hs);
 
-    (bool os, ) = payable(0xBc580550DbeCA7EEd8477c7dEeA356dF5EadF3cF).call{value: address(this).balance}('');
+    (bool os, ) = payable(0xDf911FaA8a87700111b64F2ad5B9dBE25CEf47F9).call{value: address(this).balance}('');
     require(os);
   }
 
